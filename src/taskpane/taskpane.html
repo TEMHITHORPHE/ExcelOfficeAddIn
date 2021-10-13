@@ -1,0 +1,157 @@
+<!-- Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT License. -->
+<!-- This file shows how to design a first-run page that provides a welcome screen to the user about the features of the add-in. -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BirminD Report Turn-In Add-in</title>
+
+    <!-- Office JavaScript API -->
+    <script type="text/javascript" src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+
+    <!-- For more information on Fluent UI, visit https://developer.microsoft.com/fluentui#/. -->
+    <!--    <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/9.6.1/css/fabric.min.css"/>-->
+
+    <!-- Template styles -->
+    <!--    <link href="taskpane.css" rel="stylesheet" type="text/css" />-->
+
+    <link href="../../assets/styles/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="../../assets/styles/font-awesome.min.css" rel="stylesheet" type="text/css"/>
+    <link href="./taskpane.css" rel="stylesheet" type="text/css"/>
+
+    <script type="text/javascript" src="../../assets/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="./taskpane.js"></script>
+
+</head>
+
+<body>
+<div class="container-fluid">
+    <div class="row g-2">
+        <div class="col">
+            <div class="input-group mb-3">
+                <span class="input-group-text">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-fill" viewBox="0 0 16 16">
+                        <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/>
+                    </svg>
+                </span>
+                <input type="text" class="form-control" placeholder="Username" aria-label="Username" aria-describedby="username" id="username">
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group mb-3">
+                <span class="input-group-text">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock-fill" viewBox="0 0 16 16">
+                        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+                    </svg>
+                </span>
+                <input type="password" class="form-control" placeholder="Password" aria-label="password" aria-describedby="password" id="password">
+            </div>
+        </div>
+    </div>
+    <div class="row g-2">
+        <div class="col">
+            <div class="input-group mb-3">
+                <span class="input-group-text" >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-person-badge" viewBox="0 0 16 16">
+                        <path d="M6.5 2a.5.5 0 0 0 0 1h3a.5.5 0 0 0 0-1h-3zM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/>
+                        <path d="M4.5 0A2.5 2.5 0 0 0 2 2.5V14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2.5A2.5 2.5 0 0 0 11.5 0h-7zM3 2.5A1.5 1.5 0 0 1 4.5 1h7A1.5 1.5 0 0 1 13 2.5v10.795a4.2 4.2 0 0 0-.776-.492C11.392 12.387 10.063 12 8 12s-3.392.387-4.224.803a4.2 4.2 0 0 0-.776.492V2.5z"/>
+                    </svg>
+                </span>
+                <input type="text" class="form-control" placeholder="Project_id" aria-label="project_id" aria-describedby="project_id" id="project_id">
+            </div>
+        </div>
+        <div class="col">
+            <div class="input-group mb-3">
+                <span class="input-group-text">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-menu-button-wide" viewBox="0 0 16 16">
+                        <path d="M0 1.5A1.5 1.5 0 0 1 1.5 0h13A1.5 1.5 0 0 1 16 1.5v2A1.5 1.5 0 0 1 14.5 5h-13A1.5 1.5 0 0 1 0 3.5v-2zM1.5 1a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-13z"/>
+                        <path d="M2 2.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5zm10.823.323-.396-.396A.25.25 0 0 1 12.604 2h.792a.25.25 0 0 1 .177.427l-.396.396a.25.25 0 0 1-.354 0zM0 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V8zm1 3v2a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2H1zm14-1V8a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v2h14zM2 8.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5z"/>
+                    </svg>
+                </span>
+                <select class="form-select" aria-label="Example select with button addon" id="strategy">
+                    <option selected>strategy</option>
+                    <option value="Optimization">Optimization</option>
+                    <option value="Prediction">Prediction</option>
+                    <option value="Relevance">Relevance</option>
+                </select>
+                <!--                <span class="input-group-text" id="strategy1">-->
+                <!--                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">-->
+                <!--                        <path d="M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z"/>-->
+                <!--                    </svg>-->
+                <!--                </span>-->
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row g-2">
+        <div class="col-3 position-relative">
+            <!-- Submit Button -->
+            <button type="button" class="btn btn-warning btn-lg btn-block mt-3 form-buttons position-absolute top-50 start-50 translate-middle" id="refresh-button">Refresh</button>
+        </div>
+        <div class="col-3 position-relative">
+            <!-- Save Button -->
+            <button type="button" class="btn btn-success btn-lg mt-3 btn-block form-buttons position-absolute top-50 start-50 translate-middle" id="save-button">Save</button>
+        </div>
+        <div class="col-3 position-relative">
+            <!-- Close Button -->
+            <button type="button" class="btn btn-danger btn-lg mt-3 form-buttons position-absolute top-50 start-50 translate-middle" id="close-button">Close</button>
+        </div>
+        <div class="col-3 position-relative">
+            <!-- Submit Button -->
+            <button type="button" class="btn btn-info btn-lg btn-block mt-3 form-buttons position-absolute top-50 start-50 translate-middle" id="submit-button">Send</button>
+        </div>
+
+    </div>
+</div>
+
+
+<div class="d-grid gap-2 col-9 mx-auto mt-5">
+    <button class="btn btn-primary" type="button" id="check-status">Check status</button>
+</div>
+
+
+<!-- TOAST SECTION -->
+<div class="container-fluid" id="toast-container">
+    <div aria-live="polite" aria-atomic="true" class="position-relative">
+        <div class="toast-container position-absolute bottom-0 end-0">
+
+
+            <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true" id="toast-for-upload-success">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-up-fill" viewBox="0 0 16 16">
+                            <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM6.354 9.854a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 8.707V12.5a.5.5 0 0 1-1 0V8.707L6.354 9.854z"/>
+                        </svg>
+                        Workbook submitted successfully
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+
+            <div class="toast align-items-center" role="alert" aria-live="assertive" aria-atomic="true" id="toast-for-upload-failed">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-arrow-up-fill" viewBox="0 0 16 16">
+                            <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0zM9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1zM6.354 9.854a.5.5 0 0 1-.708-.708l2-2a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 8.707V12.5a.5.5 0 0 1-1 0V8.707L6.354 9.854z"/>
+                        </svg>
+                        Workbook submission failed!
+                    </div>
+                    <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+</body>
+
+
+</html>
