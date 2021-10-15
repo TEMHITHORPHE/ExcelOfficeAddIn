@@ -3,13 +3,26 @@
  * See LICENSE in the project root for license information.
  */
 
-// images references in the manifest
-// import "../../assets/icons/icon-16.png";
-// import "../../assets/icons/icon-32.png";
-import "../../assets/icons/icon-80.png";
-const FormData = require("form-data");
-
+const toastList = {}
 /* global console, document, Excel, Office */
+
+//Polyfill for toggling element attributes. (Using this polyfill because IExplorer doesn't support "Element.toggleAttribute()")
+if (!Element.prototype.toggleAttribute) {
+  Element.prototype.toggleAttribute = function(name, force) {
+    if(force !== void 0) force = !!force
+
+    if (this.hasAttribute(name)) {
+      if (force) return true;
+
+      this.removeAttribute(name);
+      return false;
+    }
+    if (force === false) return false;
+
+    this.setAttribute(name, "");
+    return true;
+  };
+}
 
 function refreshHandler(){
 
@@ -55,6 +68,7 @@ async function checkStatusHandler() {
   const formFields = retrieveFormFields();
   delete formFields.strategy; // Since "strategy" is not required/expected by the API, we remove it
 
+  // We retrieve stored submission key gotten from excel file upload.
   const submissionKey = Office.context.document.settings.get("submission-key");
   console.log("[+] Retrieved Submission Key: " + submissionKey);
 
@@ -64,47 +78,94 @@ async function checkStatusHandler() {
   }
 
   formFields.file_key = submissionKey.trim();
-  await createWorksheetTab({})
-  // const response = await fetch("http://localhost:5000/add/status", {
-  //   method: 'POST',
-  //   body: formFields,
-  // });
-  //
-  // const worksheetData = await response.json();
-  //
-  // if (worksheetData.length < 2){
-  //   showAlert("worksheetDataNotFound");
-  //   return;
-  // }
-  //
-  // showAlert("worksheetDataFound")
-  // await createWorksheetTab(worksheetData);
+  // await createWorksheetTab({})
+
+  // Use localhost for testing purposes
+  // http://localhost:5000/add/status
+  const response = await fetch("https://35.209.133.138:1880/birmind-status", {
+    method: 'POST',
+    body: formFields,
+  });
+
+  const worksheetData = await response.json();
+
+  if (worksheetData.length < 2){
+    showAlert("worksheetDataNotFound");
+    return;
+  }
+
+  showAlert("worksheetDataFound")
+
+  // Call the function to create the worksheet tab "Results".
+  await createWorksheetTab(worksheetData);
 
 }
 
 
 async function createWorksheetTab(worksheetData) {
 
-  worksheetData = {
-    "score": 0.9,
-    "inputs": ["Key A", "Key B", "Key Z"],
-    "output": "Value A",
-    "results": [ ["Key A", 0.75], ["Key B", 11760], ["Key Z", 10.5] ],
-    "entries_score": 0.5,
-    "optimal_point": 10,
-    "optimization_output": 0.5
-  }
-  console.log(worksheetData);
+  // worksheetData = {
+  //   "score": 0.9,
+  //   "inputs": ["Key A", "Key B", "Key Z"],
+  //   "output": "Value A",
+  //   "results": [ ["Key A", 0.75], ["Key B", 11760], ["Key Z", 10.5] ],
+  //   "entries_score": 0.5,
+  //   "optimal_point": 10,
+  //   "optimization_output": 0.5
+  // }
+  // Create the product data rows.
+  // const productData = [
+  //   ["Almonds", 6, 7.5],
+  //   ["Coffee", 20, 34.5],
+  //   ["Chocolate", 10, 9.56],
+  // ];
 
+  //Code block below is for debugging purposes
+  // for (const key in worksheetData) {
+  //   if (worksheetData.hasOwnProperty(key)){
+  //     console.log(`worksheetData[${key}] = ${worksheetData[key]}`);
+  //   }
+  // }
 
   const populateSheet = async function (context) {
-
     // We add a new worksheet named "Results" here.
     const sheet = context.workbook.worksheets.add("Results");
     // We activate the worksheet
     sheet.activate();
     // sheet.load({})
     await context.sync();
+    const rowList = [];
+
+    for (const key in worksheetData) {
+
+      if (worksheetData.hasOwnProperty(key)){
+        // console.log(`worksheetData[${key}] = ${worksheetData[key]}`);
+        if (typeof(worksheetData[key]) === 'object'){
+          if (typeof(worksheetData[key][0]) === 'object'){ // Nested List?
+            // const rowBuilder = [];
+            rowList.push([key, worksheetData[key][0][0], worksheetData[key][0][1]]); // We insert the first row
+            for (let i = 1; i < worksheetData[key].length; i++) {
+              rowList.push(['', worksheetData[key][i][0],  worksheetData[key][i][1]]);
+            }
+          }
+          else{
+            rowList.push([key, worksheetData[key][0], '']) // We insert the first row
+            for (let i = 1; i < worksheetData[key].length; i++) {
+              rowList.push(['', worksheetData[key][i],  '']);
+            }
+          }
+        }
+        else{
+          rowList.push([key, worksheetData[key], '']);
+        }
+
+      }
+
+    }
+
+    console.log("[!] RowList: \n", rowList, "\nLength: ", rowList.length);
+    const dataRange = sheet.getRange(`A1:C${rowList.length}`); // We compute needed rows to insert our data!.
+    dataRange.values = rowList; // We insert data into worksheet!.
 
   }
 
@@ -125,24 +186,32 @@ function retrieveFormFields(){
   return formFields
 }
 
-
-function showAlert(alertToShow) {
-
-  const alertObjects = {
-    uploadFailed:"toast-for-upload-failed",
-    uploadComplete:"toast-for-upload-success",
-    statusCheckFailed:"toast-for-check-status-failed",
-    statusCheckComplete:"toast-for-check-status-success",
-    worksheetDataFound: "toast-for-worksheet-data-found",
-    worksheetDataNotFound:"toast-for-worksheet-data-not-found"
+// Controls the Close/Open button functionality.
+const formInputFields = ["username", "password", "project_id", "strategy"];
+function closeHandler(event) {
+  for (let i = 0; i < formInputFields.length; i++) {
+    const element = document.getElementById(formInputFields[i]);
+    element.toggleAttribute("disabled");
   }
-
-  const toast = document.getElementById(alertObjects[alertToShow])
-  const myToast = new bootstrap.Toast(toast);
-  myToast.show();
+event.target.innerText === "Close" ? event.target.innerText = "Open" : event.target.innerText = "Close";
 }
 
+// Show's toast alerts!.
+function showAlert(alertToShow) {
+  const toast = toastList[alertToShow];
+  toast.show();
+}
 
+const alertObjects = {
+  uploadFailed:"toast-for-upload-failed",
+  uploadComplete:"toast-for-upload-success",
+  statusCheckFailed:"toast-for-check-status-failed",
+  // statusCheckComplete:"toast-for-check-status-success",
+  worksheetDataFound: "toast-for-worksheet-data-found",
+  worksheetDataNotFound:"toast-for-worksheet-data-not-found"
+}
+
+// This block of code is automagically called on Add-In load, it initializes our Add-In, so bootstrapping code should be put here.
  Office.onReady((info) => {
   if (info.host === Office.HostType.Excel) {
 
@@ -152,6 +221,31 @@ function showAlert(alertToShow) {
     document.getElementById("save-button").onclick = saveHandler
     document.getElementById("refresh-button").onclick = refreshHandler
     document.getElementById("check-status").onclick = checkStatusHandler;
+    document.getElementById("close-button").onclick = closeHandler;
+
+    // We get a reference to each toast button and initialize them all, storing them in a list for later access!.
+    for (const alertObjectsKey in alertObjects) {
+      if (alertObjects.hasOwnProperty(alertObjectsKey)){
+        const toast = document.getElementById(alertObjects[alertObjectsKey])
+        toastList[alertObjectsKey] = new bootstrap.Toast(toast);
+      }
+    }
+
+
+    // const alertObjects = [
+    //   "toast-for-upload-failed",
+    //   "toast-for-upload-success",
+    //   "toast-for-check-status-failed",
+    //   // statusCheckComplete:"toast-for-check-status-success",
+    //   "toast-for-worksheet-data-found",
+    //   "toast-for-worksheet-data-not-found"
+    // ]
+
+    // for (let i = 0; i < alertObjects.length; i++) {
+    //   const toast = document.getElementById(alertObjects[i])
+    //   // myToast.show();
+    //   toastList[alertObjects[i]] = new bootstrap.Toast(toast);
+    // }
 
   }
 })
@@ -165,15 +259,14 @@ function uploadHandler() {
   Office.context.document.getFileAsync(Office.FileType.Compressed, getFileContents);
 }
 
-
+// Retrieve the current excel file in binary and calls the corresponding upload function.
 async function getFileContents(callbackResult) {
   // let fileHandle;
   if (callbackResult.status === Office.AsyncResultStatus.Succeeded){
     const fileHandle = callbackResult.value;
-    // const sliceCount = fileHandle.sliceCount
-    // let isError = false;
 
     let byteArrayData;
+    // We call the function that performs the actual file retrieval.
     await getFileSlices(fileHandle)
         .then((fileSlices) => {
           if (fileSlices.IsSuccess === true){
@@ -185,6 +278,8 @@ async function getFileContents(callbackResult) {
         })
 
     console.log("[!] Xcel! Data!: ", byteArrayData)
+
+    // Here we call the function that performs file upload, passing it the retrieved excel binary.
     workbookUpload(byteArrayData)
 
   }
@@ -194,7 +289,7 @@ async function getFileContents(callbackResult) {
 
 }
 
-
+// This function actually does the job of uploading the excel file.
 async function workbookUpload(uInt8ArrayData) {
 
   // We retrieve the stored values.
@@ -204,26 +299,31 @@ async function workbookUpload(uInt8ArrayData) {
   formData.append("parametersObject", JSON.stringify(retrieveFormFields()));
   formData.append("excelFileBinary", uInt8ArrayData);
 
-  const response = await fetch("http://localhost:5000/add/submit", {
+  // Use localhost for testing purposes.
+  // http://localhost:5000/add/submit
+  const response = await fetch("https://35.209.133.138:1880/birmind-get", {
     method: 'POST',
     body: formData,
   });
 
+  // We expect the result of the upload to be a submission key.
   const keyString = await response.text();
-  console.log("Saved submissionKey: ", keyString);
+  console.log("Res: ", keyString);
 
   if (keyString === null || keyString.length <= 0 ){
     showAlert("uploadFailed");
   }
   else if (keyString.length > 0 ){
+    // We save the "submission" key received from the post request above.
     Office.context.document.settings.set("submission-key", keyString.trim());
     Office.context.document.settings.saveAsync();
+    console.log("Saved submissionKey: ", keyString);
     showAlert("uploadComplete")
   }
 
 }
 
-
+// The power engine function that does the actual excel file binary retrieval
 function getFileSlices(fileHandle) {
 
   const sliceCount = fileHandle.sliceCount
@@ -254,7 +354,7 @@ function getFileSlices(fileHandle) {
 
       await sliceReadPromise.catch((error) => {
         isError = true;
-
+        console.log(error);
       });
     }
 
