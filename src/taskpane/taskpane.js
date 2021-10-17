@@ -2,6 +2,13 @@
  * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
  * See LICENSE in the project root for license information.
  */
+import "../../assets/icons/icon-16.png";
+import "../../assets/icons/icon-32.png";
+import "../../assets/icons/icon-64.png";
+import "../../assets/icons/icon-80.png";
+import "../../assets/icons/icon-128.png";
+
+
 
 const toastList = {}
 /* global console, document, Excel, Office */
@@ -38,7 +45,7 @@ function refreshHandler(){
       console.log("[!] Retrieved Settings: ", settingsObject)
       console.log("[!] Retrieved Form Fields: ", formFieldsObject)
 
-      if (formFieldsObject === undefined ) return
+      if (formFieldsObject === null ) return
 
       // We update the form fields respectively.
       document.getElementById("username").value = formFieldsObject.username;
